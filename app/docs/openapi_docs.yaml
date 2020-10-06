@@ -1,0 +1,51 @@
+openapi: "3.0.0"
+info:
+  description: Documentation for the Weding Shop API.
+  version: 0.0.1
+  title: The Wedding Shop API
+components:
+  parameters:
+    q:
+      name: q
+      in: query
+      required: false
+      description: >
+        JSON string used to filter, limit and sort the returned objects.
+        Supported keys are the following (all optional)
+          * filters: list of dictionaries in the format {"name":"<name_of_field>","op":"<operator>","val":"<value_to_match>"}
+          * limit: integer, maximum number of items to return
+          * offset: integer, offset into the result set of the returned list
+          * order_by: list of dictionaries in the format {"field":"<name_of_field>","direction":"<sort_direction>"}
+        Format to use for filters is defined in this URL:
+            <https://flask-restless.readthedocs.io/en/latest/filtering.html#filter-objects>
+        Example of usage
+            <uri>?q={"filters":[{"name":"full_name","op":"like","val":"John%"}],"limit":10,"offset":100,"order_by":[{"field":"full_name","direction":"asc"}]}
+      schema:
+        type: string
+        example: '{"limit": 50}'
+  schemas:
+    Healthcheck:
+      description: Status of the service checker
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Welcome to The Wedding Shop API!"
+tags:
+  - name: healthcheck
+    description: Service status information.
+paths:
+  /healthcheck:
+    get:
+      tags:
+        - healthcheck
+      summary: Check the status of the service
+      description: Call this endpoint to check the status of the service
+      operationId: healthcheck
+      responses:
+        '200':
+          description: Healthy service
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Healthcheck'

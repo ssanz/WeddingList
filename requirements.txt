@@ -1,0 +1,5 @@
+Flask==1.1.2
+Flask-Restless==0.17.0
+Flask-SQLAlchemy==2.4.4
+flask-swagger-ui==3.25.0
+PyYAML==5.3.1
