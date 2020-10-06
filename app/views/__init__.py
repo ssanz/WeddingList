@@ -3,6 +3,7 @@ from flask import jsonify, current_app
 
 from app.docs.setup import swaggerui_api_blueprint
 from app.views.healthcheck import healthcheck
+from app.views.homepage import homepage
 
 # Set up public URLs.
 public_urls = [
