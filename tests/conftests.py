@@ -5,6 +5,7 @@ from app.app import create_app
 
 app = create_app()
 
+
 # Fixtures.
 @pytest.fixture
 def test_session():
