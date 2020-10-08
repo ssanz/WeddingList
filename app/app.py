@@ -2,6 +2,7 @@
 import time
 
 from flask import Flask, g, request
+from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
@@ -12,6 +13,7 @@ def create_app():
     app.config.from_pyfile('./config.py')
 
     db.init_app(app)
+    Migrate(app, db)
 
     def before_request():
         """
