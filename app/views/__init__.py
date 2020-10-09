@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-from flask import jsonify, current_app
+from flask import current_app
 
 from app.docs.setup import swaggerui_api_blueprint
 from app.views.healthcheck import healthcheck
 from app.views.homepage import homepage
+from app.views.user_list import user_list_blueprint
 
 # Set up public URLs.
 public_urls = [
@@ -15,4 +16,7 @@ public_urls = [
 ]
 
 # Register blueprints.
+# # Documentation.
 current_app.register_blueprint(swaggerui_api_blueprint, url_prefix=current_app.config["SWAGGER_API_URL"])
+# # Endpoints.
+current_app.register_blueprint(user_list_blueprint)
