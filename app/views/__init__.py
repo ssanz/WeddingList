@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from flask import current_app
+from flask import current_app, jsonify
+from werkzeug.exceptions import BadRequest, Forbidden, MethodNotAllowed, NotFound, NotImplemented
 
 from app.docs.setup import swaggerui_api_blueprint
 from app.views.healthcheck import healthcheck
@@ -20,3 +21,34 @@ public_urls = [
 current_app.register_blueprint(swaggerui_api_blueprint, url_prefix=current_app.config["SWAGGER_API_URL"])
 # # Endpoints.
 current_app.register_blueprint(user_list_blueprint)
+
+
+@current_app.errorhandler(BadRequest)
+@current_app.errorhandler(Forbidden)
+@current_app.errorhandler(MethodNotAllowed)
+@current_app.errorhandler(NotFound)
+@current_app.errorhandler(NotImplemented)
+def wsgi_tool_error_handler(e):
+    """
+    Error handler for a HTTP Exception raised by the APP.
+    """
+    status_code = e.code
+    result = {
+        "error_message": e.description,
+        "error_code": e.name.upper().replace(" ", "_")
+    }
+    return jsonify(result), status_code
+
+
+@current_app.errorhandler(Exception)
+def handle_uncaught_error(e):
+    """
+    Error handler for unexpected internal server error exceptions. This exceptions must be fixed in case we got one.
+    """
+    status_code = 500
+
+    result = {
+        "error_message": "Unknown or unexpected error.",
+        "error_code": "INTERNAL_SERVER_ERROR"
+    }
+    return jsonify(result), status_code
