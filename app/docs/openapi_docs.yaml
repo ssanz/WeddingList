@@ -23,6 +23,87 @@ components:
       schema:
         type: string
         example: '{"limit": 50}'
+  responses:
+    SuccessRead:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              count:
+                description: Number of total results that match the filters specified in the request, ignoring limit and offset.
+                type: integer
+                example: 100
+              num_results:
+                type: integer
+                example: 100
+              objects:
+                type: array
+              page:
+                type: integer
+                example: 1
+              total_pages:
+                type: integer
+                example: 10
+    SuccessCreate:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: A new record was added successfully into the model.
+              resource_id:
+                type: integer
+                example: 1
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            properties:
+              error_msg:
+                type: string
+                example: Invalid field.
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            properties:
+              error_msg:
+                type: string
+                example: Invalid permissions.
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            properties:
+              error_msg:
+                type: string
+                example: The resource was not found.
+    NotImplemented:
+      description: Not implemented
+      content:
+        application/json:
+          schema:
+            properties:
+              error_msg:
+                type: string
+                example: This version is not implemented yet.
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            properties:
+              error_msg:
+                type: string
+                example: Invalid token.
   schemas:
     Healthcheck:
       description: Status of the service checker
@@ -31,9 +112,60 @@ components:
         message:
           type: string
           example: "Welcome to The Wedding Shop API!"
+    Product:
+      description: Product general information.
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Tea pot
+        brand:
+          type: string
+          example: Le Creuset
+        price:
+          type: float
+          example: 47.00
+        in_stock_quantity:
+          type: integer
+          example: 50
+    User:
+      description: User information.
+      type: object
+      properties:
+        id:
+          type: string
+          example: bf0622b8-6509-4037-a618-7b3dc685a99e
+        login:
+          type: string
+          example: user@theweddingshop.co.uk
+        name:
+          type: string
+          example: John Doe
+    UserList:
+      description: List of products that belongs to a user. This products could be in the wish list (pending) or purchased.
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        user_id:
+          type: object
+          $ref: '#/components/schemas/User'
+        product_id:
+          type: object
+          $ref: '#/components/schemas/Product'
+        state:
+          type: string
+          example: wish
+          enum: ['wish', 'purchased', 'cancelled']
 tags:
   - name: healthcheck
     description: Service status information.
+  - name: user_list
+    description: User List information.
 paths:
   /healthcheck:
     get:
@@ -49,3 +181,75 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Healthcheck'
+  /user_list:
+    get:
+      tags:
+        - user_list
+      summary: Retrieve the user list of products.
+      description: Call this endpoint to retrieve the products that are on the user list.
+      operationId: user_list
+      parameters:
+        - $ref: '#/components/parameters/q'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/responses/SuccessRead/content/application%2Fjson/schema/properties/count'
+                  num_results:
+                    $ref: '#/components/responses/SuccessRead/content/application%2Fjson/schema/properties/num_results'
+                  page:
+                    $ref: '#/components/responses/SuccessRead/content/application%2Fjson/schema/properties/page'
+                  total_pages:
+                    $ref: '#/components/responses/SuccessRead/content/application%2Fjson/schema/properties/total_pages'
+                  objects:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UserList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '501':
+          $ref: '#/components/responses/NotImplemented'
+    post:
+      tags:
+        - user_list
+      summary: Create a record in the list.
+      description: This endpoint allows to add a new product in the whish list.
+      operationId: createUserList
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  $ref: '#/components/schemas/User/properties/id'
+                product_id:
+                  $ref: '#/components/schemas/Product/properties/id'
+              required:
+                - user_id
+                - product_id
+      responses:
+        '201':
+          $ref: '#/components/responses/SuccessCreate'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '501':
+          $ref: '#/components/responses/NotImplemented'

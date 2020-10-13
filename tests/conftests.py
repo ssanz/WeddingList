@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 import os
 import uuid
 
 import pytest
+from jose import jwt
 
 from app.app import db, create_app
 from app.models.product import Product
@@ -12,6 +13,32 @@ from app.models.user import User
 from app.models.user_list import UserList
 
 app = create_app()
+
+
+def get_headers(secret="Super$ecretK3y", token_data=None, login=None, exp=None, audience=None):
+    """
+    TODO: Improve authentication method.
+    Helper function to generate the required header for a token user.
+    :param secret: (str) Secret name in AWS. Default value will be from 'TEST_JWT_SECRET' constant.
+    :param token_data: (dict) User info such as login or when it is expired.
+    :param login: (str) User login. Only used if there is token data. Default value will be 'TEST_JWT_USER'.
+    :param exp: (int) Expired token date minus 01-01-1970 in seconds. Only used if there is token data. Default
+        value will be today plus one day.
+    :param audience: (list) User audience (for access permissions). Default value will be ['pulse_api']
+    :return:
+    """
+    if not token_data:
+        token_data = {
+            'login': login,
+            'exp': exp or int((datetime.now() + timedelta(days=1) - datetime(1970, 1, 1)).total_seconds()),
+            'aud': audience or ['pulse_api']
+        }
+
+    token = jwt.encode(token_data, secret, algorithm='HS256')
+
+    return {
+        'Authorization': f'Bearer {token}'
+    }
 
 
 # Fixtures.
