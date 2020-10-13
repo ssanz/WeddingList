@@ -31,9 +31,60 @@ components:
         message:
           type: string
           example: "Welcome to The Wedding Shop API!"
+    Product:
+      description: Product general information.
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Tea pot
+        brand:
+          type: string
+          example: Le Creuset
+        price:
+          type: float
+          example: 47.00
+        in_stock_quantity:
+          type: integer
+          example: 50
+    User:
+      description: User information.
+      type: object
+      properties:
+        id:
+          type: string
+          example: bf0622b8-6509-4037-a618-7b3dc685a99e
+        login:
+          type: string
+          example: user@theweddingshop.co.uk
+        name:
+          type: string
+          example: John Doe
+    UserList:
+      description: List of products that belongs to a user. This products could be in the wish list (pending) or purchased.
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        user_id:
+          type: object
+          $ref: '#/components/schemas/User'
+        product_id:
+          type: object
+          $ref: '#/components/schemas/Product'
+        state:
+          type: string
+          example: wish
+          enum: ['wish', 'purchased', 'cancelled']
 tags:
   - name: healthcheck
     description: Service status information.
+  - name: user_list
+    description: User List information.
 paths:
   /healthcheck:
     get:
