@@ -102,6 +102,7 @@ def _remove_gift_from_list(user_list_id):
 
 
 @current_app.route(f"{BASE_PATH}/{COLLECTION_NAME}", methods=['POST'])
+@current_app.route(f"{BASE_PATH}/{COLLECTION_NAME}/<int:user_list_id>", methods=['DELETE'])
 def create_delete_user_list(version, user_list_id=None):
     """
     Requests to add or remove a gift to/from the user list.
@@ -109,15 +110,23 @@ def create_delete_user_list(version, user_list_id=None):
     if version != 1:
         raise NotImplemented
 
-    body = request.get_json()
-    user_id = body.get("user_id")
-    product_id = body.get("product_id")
+    if request.method.upper() == "POST":
+        body = request.get_json()
+        user_id = body.get("user_id")
+        product_id = body.get("product_id")
 
-    ul = _add_gift_to_list(user_id=user_id, product_id=product_id)
+        ul = _add_gift_to_list(user_id=user_id, product_id=product_id)
 
-    message = "A user gift was added successfully into the list."
-    resource_id = ul.id
-    status_code = 201
+        message = "A user gift was added successfully into the list."
+        resource_id = ul.id
+        status_code = 201
+
+    else:
+        _remove_gift_from_list(user_list_id)
+
+        message = "The user gift has been successfully removed from the list."
+        resource_id = None
+        status_code = 200
 
     response = get_successful_response(message=message, resource_id=resource_id)
 
