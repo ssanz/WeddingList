@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import passlib
+import passlib  # DO NOT REMOVE: Necessary internally for 'password' field.
 
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy_utils import PasswordType, force_auto_coercion
