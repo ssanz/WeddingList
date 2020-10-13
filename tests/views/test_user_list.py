@@ -173,7 +173,7 @@ def test_add_gift_to_list_already_exists(test_session):
 
     with test_session.application.app_context():
         user = User.query.filter_by().first()
-        product_ids = [l.product_id for l in UserList.query.filter_by(user_id=user.id)]
+        product_ids = [user_list.product_id for user_list in UserList.query.filter_by(user_id=user.id)]
         product = Product.query.filter(and_(Product.in_stock_quantity > 0, ~Product.id.in_(product_ids))).first()
 
     body = {
