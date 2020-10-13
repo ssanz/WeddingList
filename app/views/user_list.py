@@ -13,7 +13,7 @@ from app.views.utils import BASE_PATH, ERROR_NOT_ENOUGH_STOCK, ERROR_PRODUCT_ID_
     ERROR_USER_ID_BAD_FORMAT, ERROR_USER_LIST_PRODUCT_ALREADY_EXISTS, ERROR_USER_NOT_FOUND, get_successful_response,\
     manager
 
-COLLECTION_NAME = "user_list/add_gift_to_list"
+COLLECTION_NAME = "user_list"
 
 user_list_blueprint = manager.create_api_blueprint(
     UserList,
@@ -82,10 +82,29 @@ def _add_gift_to_list(user_id, product_id):
     return user_list
 
 
-@current_app.route(f"{BASE_PATH}/{COLLECTION_NAME}", methods=['POST'])
-def add_gift_to_list(version):
+def _remove_gift_from_list(user_list_id):
     """
-    POST request to add a new gift to the user list.
+    Common method to remove an existing gift from the user list.
+    :param user_list_id: (int)
+    :raises:
+        - NotFound -> If the user list does not exists.
+        - Forbidden -> If the product was already cancelled or purchased.
+    """
+    try:
+        ul = UserList.query.get(user_list_id)
+    except:
+        raise
+
+    if ul.state != "gift":
+        raise
+
+    ul.state = "cancelled"
+
+
+@current_app.route(f"{BASE_PATH}/{COLLECTION_NAME}", methods=['POST'])
+def create_delete_user_list(version, user_list_id=None):
+    """
+    Requests to add or remove a gift to/from the user list.
     """
     if version != 1:
         raise NotImplemented
@@ -97,7 +116,9 @@ def add_gift_to_list(version):
     ul = _add_gift_to_list(user_id=user_id, product_id=product_id)
 
     message = "A user gift was added successfully into the list."
+    resource_id = ul.id
     status_code = 201
-    response = get_successful_response(message=message, resource_id=ul.id)
+
+    response = get_successful_response(message=message, resource_id=resource_id)
 
     return response, status_code
