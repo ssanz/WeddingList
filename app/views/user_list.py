@@ -10,8 +10,8 @@ from app.models.user import User
 from app.models.product import Product
 from app.models.user_list import UserList
 from app.views.utils import BASE_PATH, ERROR_NOT_ENOUGH_STOCK, ERROR_PRODUCT_ID_BAD_FORMAT, ERROR_PRODUCT_NOT_FOUND,\
-    ERROR_USER_ID_BAD_FORMAT, ERROR_USER_LIST_PRODUCT_ALREADY_EXISTS, ERROR_USER_NOT_FOUND, get_successful_response,\
-    manager
+    ERROR_USER_ID_BAD_FORMAT, ERROR_USER_LIST_DELETE_WRONG_STATE, ERROR_USER_LIST_NOT_FOUND,\
+    ERROR_USER_LIST_PRODUCT_ALREADY_EXISTS, ERROR_USER_NOT_FOUND, get_successful_response, manager
 
 COLLECTION_NAME = "user_list"
 
@@ -90,15 +90,20 @@ def _remove_gift_from_list(user_list_id):
         - NotFound -> If the user list does not exists.
         - Forbidden -> If the product was already cancelled or purchased.
     """
-    try:
-        ul = UserList.query.get(user_list_id)
-    except:
-        raise
+    ul = UserList.query.get(user_list_id)
 
-    if ul.state != "gift":
-        raise
+    # Check if the record exists for the provided ID.
+    if not ul:
+        raise NotFound(ERROR_USER_LIST_NOT_FOUND)
+
+    # Only a record in 'wish' status can be cancelled.
+    if ul.state != "wish":
+        raise Forbidden(ERROR_USER_LIST_DELETE_WRONG_STATE)
 
     ul.state = "cancelled"
+    ul.write_date = datetime.utcnow()
+    db.session.add(ul)
+    db.session.commit()
 
 
 @current_app.route(f"{BASE_PATH}/{COLLECTION_NAME}", methods=['POST'])

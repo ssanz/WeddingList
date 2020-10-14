@@ -23,6 +23,14 @@ components:
       schema:
         type: string
         example: '{"limit": 50}'
+    user_list_id:
+      name: user_list_id
+      in: path
+      required: true
+      description: Resource unique identifier.
+      schema:
+        type: integer
+      example: 1
   responses:
     SuccessRead:
       description: Successful operation
@@ -55,10 +63,20 @@ components:
             properties:
               message:
                 type: string
-                example: A new record was added successfully into the model.
+                example: A new record was added successfully into the table.
               resource_id:
                 type: integer
                 example: 1
+    SuccessDelete:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: An existing record was deleted successfully from the table.
     BadRequest:
       description: Bad request
       content:
@@ -245,6 +263,26 @@ paths:
           $ref: '#/components/responses/SuccessCreate'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '501':
+          $ref: '#/components/responses/NotImplemented'
+  /user_list/{user_list_id}:
+    delete:
+      tags:
+        - user_list
+      summary: Delete a user list product.
+      description: Call this endpoint to delete a product from the user wish list.
+      operationId: delete_user_list
+      parameters:
+        - $ref: '#/components/parameters/user_list_id'
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessDelete'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
