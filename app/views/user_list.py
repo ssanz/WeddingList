@@ -10,7 +10,7 @@ from app.models.user import User
 from app.models.product import Product
 from app.models.user_list import UserList
 from app.views.utils import BASE_PATH, ERROR_NOT_ENOUGH_STOCK, ERROR_PRODUCT_ID_BAD_FORMAT, ERROR_PRODUCT_NOT_FOUND,\
-    ERROR_USER_ID_BAD_FORMAT, ERROR_USER_LIST_DELETE_WRONG_STATE, ERROR_USER_LIST_NOT_FOUND,\
+    ERROR_USER_ID_BAD_FORMAT, ERROR_USER_LIST_ACTION_WRONG_STATE, ERROR_USER_LIST_NOT_FOUND,\
     ERROR_USER_LIST_PRODUCT_ALREADY_EXISTS, ERROR_USER_NOT_FOUND, get_successful_response, manager
 
 COLLECTION_NAME = "user_list"
@@ -82,13 +82,14 @@ def _add_gift_to_list(user_id, product_id):
     return user_list
 
 
-def _remove_gift_from_list(user_list_id):
+def _update_gift_from_list(user_list_id, action):
     """
-    Common method to remove an existing gift from the user list.
+    Common method to update an existing gift from the user list.
     :param user_list_id: (int)
+    :param action: (str) Action to be taken. Allowed actions: 'delete' and 'purchase'.
     :raises:
-        - NotFound -> If the user list does not exists.
-        - Forbidden -> If the product was already cancelled or purchased.
+        - NotFound -> If the user list record does NOT exists.
+        - Forbidden -> If the action is not allowed for whatever reason.
     """
     ul = UserList.query.get(user_list_id)
 
@@ -96,11 +97,12 @@ def _remove_gift_from_list(user_list_id):
     if not ul:
         raise NotFound(ERROR_USER_LIST_NOT_FOUND)
 
-    # Only a record in 'wish' status can be cancelled.
-    if ul.state != "wish":
-        raise Forbidden(ERROR_USER_LIST_DELETE_WRONG_STATE)
+    if action in ["delete", "purchase"] and ul.state != "wish":
+        # Only a record in 'wish' status can be cancelled or purchased.
+        raise Forbidden(ERROR_USER_LIST_ACTION_WRONG_STATE)
 
-    ul.state = "cancelled"
+    new_state = "cancelled" if action == "delete" else "purchased"
+    ul.state = new_state
     ul.write_date = datetime.utcnow()
     db.session.add(ul)
     db.session.commit()
@@ -127,7 +129,7 @@ def create_delete_user_list(version, user_list_id=None):
         status_code = 201
 
     else:
-        _remove_gift_from_list(user_list_id)
+        _update_gift_from_list(user_list_id, "delete")
 
         message = "The user gift has been successfully removed from the list."
         resource_id = None
@@ -136,3 +138,19 @@ def create_delete_user_list(version, user_list_id=None):
     response = get_successful_response(message=message, resource_id=resource_id)
 
     return response, status_code
+
+
+@current_app.route(f"{BASE_PATH}/{COLLECTION_NAME}/<int:user_list_id>/purchase", methods=['PUT'])
+def purchase_gift(version, user_list_id=None):
+    """
+    Requests to purchase a gift from the user list.
+    """
+    if version != 1:
+        raise NotImplemented
+
+    _update_gift_from_list(user_list_id, "purchase")
+
+    message = "A user gift was purchased successfully from the wish list."
+    response = get_successful_response(message=message)
+
+    return response, 200

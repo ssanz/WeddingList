@@ -77,6 +77,16 @@ components:
               message:
                 type: string
                 example: An existing record was deleted successfully from the table.
+    SuccessUpdate:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: An existing record was updated successfully from the table.
     BadRequest:
       description: Bad request
       content:
@@ -283,6 +293,26 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/SuccessDelete'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '501':
+          $ref: '#/components/responses/NotImplemented'
+  /user_list/{user_list_id}/purchase:
+    put:
+      tags:
+        - user_list
+      summary: Purchase a user list product.
+      description: Call this endpoint to purchase a product from the user wish list.
+      operationId: purchase_user_list
+      parameters:
+        - $ref: '#/components/parameters/user_list_id'
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessUpdate'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
