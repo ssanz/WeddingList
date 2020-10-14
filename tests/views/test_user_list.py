@@ -9,7 +9,7 @@ from app.models.product import Product
 from app.models.user import User
 from app.models.user_list import UserList
 from app.views.utils import ERROR_NOT_ENOUGH_STOCK, ERROR_PRODUCT_ID_BAD_FORMAT, ERROR_PRODUCT_NOT_FOUND,\
-    ERROR_USER_ID_BAD_FORMAT, ERROR_USER_LIST_DELETE_WRONG_STATE, ERROR_USER_LIST_NOT_FOUND,\
+    ERROR_USER_ID_BAD_FORMAT, ERROR_USER_LIST_ACTION_WRONG_STATE, ERROR_USER_LIST_NOT_FOUND,\
     ERROR_USER_LIST_PRODUCT_ALREADY_EXISTS, ERROR_USER_NOT_FOUND
 from app.views.user_list import COLLECTION_NAME as USER_LIST_URL
 # 'test_session' is a PyTest fixture to be used in the tests. Do not remove.
@@ -293,4 +293,103 @@ def test_remove_gift_from_list_wrong_state(test_session):
 
             # Check that this time the same request raises a forbidden action.
             assert response.status_code == 403
-            assert response.json["error_message"] == ERROR_USER_LIST_DELETE_WRONG_STATE
+            assert response.json["error_message"] == ERROR_USER_LIST_ACTION_WRONG_STATE
+
+
+def test_purchase_gift_from_list_success(test_session):
+    """
+    Test purchase gift from list success.
+
+    Check that if a correct PUT request is send through an existing record, it is possible to purchase it.
+    """
+    url = f"/v1/{USER_LIST_URL}"
+    headers = get_headers()
+
+    with test_session.application.app_context():
+        user = User.query.filter_by().first()
+        product_ids = [user_list.product_id for user_list in UserList.query.filter_by(user_id=user.id)]
+        product = Product.query.filter(and_(Product.in_stock_quantity > 0, ~Product.id.in_(product_ids))).first()
+
+        body = {
+            "user_id": str(user.id),
+            "product_id": product.id
+        }
+
+        # Create a user list record.
+        response = test_session.post(url, data=json.dumps(body), headers=headers, content_type="application/json")
+
+        # Check that the request was successful.
+        assert response.status_code == 201
+
+        # Purchase the user list record.
+        ul_id = response.json['resource_id']
+        purchase_url = f"{url}/{ul_id}/purchase"
+        response = test_session.put(purchase_url, headers=headers, content_type="application/json")
+
+        # Check that this time the same request raises a forbidden action.
+        assert response.status_code == 200
+
+        # Check that the record has been deleted.
+        assert UserList.query.filter_by(id=ul_id, state="purchased").scalar() is not None
+
+
+def test_purchase_gift_from_list_not_found(test_session):
+    """
+    Test purchase gift from list not found.
+
+    Check that if a PUT request is send to purchase an unexisting record, it raises a NotFound exception.
+    """
+    url = f"/v1/{USER_LIST_URL}"
+    headers = get_headers()
+
+    with test_session.application.app_context():
+        # Try to purchase an unexistent user list record.
+        purchase_url = f"{url}/9999/purchase"
+        response = test_session.put(purchase_url, headers=headers, content_type="application/json")
+
+        # Check that this time the same request raises a forbidden action.
+        assert response.status_code == 404
+        assert response.json["error_message"] == ERROR_USER_LIST_NOT_FOUND
+
+
+def test_purchase_gift_from_list_wrong_state(test_session):
+    """
+    Test purchase gift from list wrong state.
+
+    Check that if a PUT request is send to a record that is NOT in 'wish' status, it raises a Forbidden exception.
+    """
+    url = f"/v1/{USER_LIST_URL}"
+    headers = get_headers()
+
+    with test_session.application.app_context():
+        user = User.query.filter_by().first()
+        product_ids = [user_list.product_id for user_list in UserList.query.filter_by(user_id=user.id)]
+        product = Product.query.filter(and_(Product.in_stock_quantity > 0, ~Product.id.in_(product_ids))).first()
+
+        body = {
+            "user_id": str(user.id),
+            "product_id": product.id
+        }
+
+        # Create a user list record.
+        response = test_session.post(url, data=json.dumps(body), headers=headers, content_type="application/json")
+
+        # Check that the request was successful.
+        assert response.status_code == 201
+
+        # Update record with any of the stats in which it must raise the exception and try to purchase it.
+        fail_states = ["cancelled", "purchased"]
+        ul = UserList.query.get(response.json['resource_id'])
+
+        for new_state in fail_states:
+            ul.state = new_state
+            db.session.add(ul)
+            db.session.commit()
+
+            # Purchase the user list record.
+            purchase_url = f"{url}/{ul.id}/purchase"
+            response = test_session.put(purchase_url, headers=headers, content_type="application/json")
+
+            # Check that this time the same request raises a forbidden action.
+            assert response.status_code == 403
+            assert response.json["error_message"] == ERROR_USER_LIST_ACTION_WRONG_STATE
