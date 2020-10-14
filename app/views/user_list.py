@@ -10,10 +10,10 @@ from app.models.user import User
 from app.models.product import Product
 from app.models.user_list import UserList
 from app.views.utils import BASE_PATH, ERROR_NOT_ENOUGH_STOCK, ERROR_PRODUCT_ID_BAD_FORMAT, ERROR_PRODUCT_NOT_FOUND,\
-    ERROR_USER_ID_BAD_FORMAT, ERROR_USER_LIST_PRODUCT_ALREADY_EXISTS, ERROR_USER_NOT_FOUND, get_successful_response,\
-    manager
+    ERROR_USER_ID_BAD_FORMAT, ERROR_USER_LIST_DELETE_WRONG_STATE, ERROR_USER_LIST_NOT_FOUND,\
+    ERROR_USER_LIST_PRODUCT_ALREADY_EXISTS, ERROR_USER_NOT_FOUND, get_successful_response, manager
 
-COLLECTION_NAME = "user_list/add_gift_to_list"
+COLLECTION_NAME = "user_list"
 
 user_list_blueprint = manager.create_api_blueprint(
     UserList,
@@ -82,22 +82,57 @@ def _add_gift_to_list(user_id, product_id):
     return user_list
 
 
-@current_app.route(f"{BASE_PATH}/{COLLECTION_NAME}", methods=['POST'])
-def add_gift_to_list(version):
+def _remove_gift_from_list(user_list_id):
     """
-    POST request to add a new gift to the user list.
+    Common method to remove an existing gift from the user list.
+    :param user_list_id: (int)
+    :raises:
+        - NotFound -> If the user list does not exists.
+        - Forbidden -> If the product was already cancelled or purchased.
+    """
+    ul = UserList.query.get(user_list_id)
+
+    # Check if the record exists for the provided ID.
+    if not ul:
+        raise NotFound(ERROR_USER_LIST_NOT_FOUND)
+
+    # Only a record in 'wish' status can be cancelled.
+    if ul.state != "wish":
+        raise Forbidden(ERROR_USER_LIST_DELETE_WRONG_STATE)
+
+    ul.state = "cancelled"
+    ul.write_date = datetime.utcnow()
+    db.session.add(ul)
+    db.session.commit()
+
+
+@current_app.route(f"{BASE_PATH}/{COLLECTION_NAME}", methods=['POST'])
+@current_app.route(f"{BASE_PATH}/{COLLECTION_NAME}/<int:user_list_id>", methods=['DELETE'])
+def create_delete_user_list(version, user_list_id=None):
+    """
+    Requests to add or remove a gift to/from the user list.
     """
     if version != 1:
         raise NotImplemented
 
-    body = request.get_json()
-    user_id = body.get("user_id")
-    product_id = body.get("product_id")
+    if request.method.upper() == "POST":
+        body = request.get_json()
+        user_id = body.get("user_id")
+        product_id = body.get("product_id")
 
-    ul = _add_gift_to_list(user_id=user_id, product_id=product_id)
+        ul = _add_gift_to_list(user_id=user_id, product_id=product_id)
 
-    message = "A user gift was added successfully into the list."
-    status_code = 201
-    response = get_successful_response(message=message, resource_id=ul.id)
+        message = "A user gift was added successfully into the list."
+        resource_id = ul.id
+        status_code = 201
+
+    else:
+        _remove_gift_from_list(user_list_id)
+
+        message = "The user gift has been successfully removed from the list."
+        resource_id = None
+        status_code = 200
+
+    response = get_successful_response(message=message, resource_id=resource_id)
 
     return response, status_code
