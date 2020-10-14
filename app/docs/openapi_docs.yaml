@@ -23,6 +23,14 @@ components:
       schema:
         type: string
         example: '{"limit": 50}'
+    user_id:
+      name: user_id
+      in: path
+      required: true
+      description: Resource unique identifier.
+      schema:
+        type: string
+      example: bf0622b8-6509-4037-a618-7b3dc685a99e
     user_list_id:
       name: user_list_id
       in: path
@@ -172,6 +180,18 @@ components:
         name:
           type: string
           example: John Doe
+        create_date:
+          type: string
+          format: date-time
+          example: '2020-01-01T00:00:00'
+        last_login:
+          type: string
+          format: date-time
+          example: '2020-01-01T00:00:00'
+        write_date:
+          type: string
+          format: date-time
+          example: '2020-01-01T00:00:00'
     UserList:
       description: List of products that belongs to a user. This products could be in the wish list (pending) or purchased.
       type: object
@@ -192,8 +212,10 @@ components:
 tags:
   - name: healthcheck
     description: Service status information.
+  - name: user
+    description: Users information.
   - name: user_list
-    description: User List information.
+    description: User Lists information.
 paths:
   /healthcheck:
     get:
@@ -209,6 +231,57 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Healthcheck'
+  /user:
+    get:
+      tags:
+        - user
+      summary: Retrieve the users.
+      description: Call this endpoint to retrieve the users information.
+      operationId: user
+      parameters:
+        - $ref: '#/components/parameters/q'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/responses/SuccessRead/content/application%2Fjson/schema/properties/count'
+                  num_results:
+                    $ref: '#/components/responses/SuccessRead/content/application%2Fjson/schema/properties/num_results'
+                  page:
+                    $ref: '#/components/responses/SuccessRead/content/application%2Fjson/schema/properties/page'
+                  total_pages:
+                    $ref: '#/components/responses/SuccessRead/content/application%2Fjson/schema/properties/total_pages'
+                  objects:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '501':
+          $ref: '#/components/responses/NotImplemented'
+  /user/{user_id}/report:
+    get:
+      tags:
+        - user
+      summary: Display the user list report.
+      description: Call this endpoint to print on screen the user list report.
+      operationId: report_user_list
+      parameters:
+        - $ref: '#/components/parameters/user_id'
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessRead'
   /user_list:
     get:
       tags:

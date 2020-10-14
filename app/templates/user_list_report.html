@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>{{title}}</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    </head>
+    <body>
+        <div>
+            <div id="user_details">
+                <p>
+                    Dear {{user.name}},<br/>
+                    Here is your current report with date
+                    <script>
+                        document.write(new Date().toLocaleDateString());
+                    </script>.
+                </p>
+            </div>
+            {% if wish_products %}
+                <div id="wish_list">
+                    <h4>Gifts in the wish list</h4>
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">Name</th>
+                                <th scope="col">Brand</th>
+                                <th scope="col">Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for w in wish_products %}
+                            <tr>
+                                <td>{{w.name}}</td>
+                                <td>{{w.brand}}</td>
+                                <td>£{{w.price}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr style="font-weight:bold">
+                                <td></td>
+                                <td>Total:</td>
+                                <td>£{{wish_total}}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            {% endif %}
+            {% if purchased_products %}
+                <div id="purchased_list">
+                    <h4>Gifts already purchased</h4>
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">Name</th>
+                                <th scope="col">Brand</th>
+                                <th scope="col">Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in purchased_products %}
+                            <tr>
+                                <td>{{p.name}}</td>
+                                <td>{{p.brand}}</td>
+                                <td>£{{p.price}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr style="font-weight:bold">
+                                <td></td>
+                                <td>Total:</td>
+                                <td>£{{purchased_total}}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </body>
+</html>
