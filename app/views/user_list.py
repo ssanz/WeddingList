@@ -20,6 +20,7 @@ user_list_blueprint = manager.create_api_blueprint(
     methods=['GET'],
     url_prefix=BASE_PATH,
     collection_name=COLLECTION_NAME,
+    exclude_columns=['product_id', 'user_id', 'user.password'],
     primary_key='id'
 )
 

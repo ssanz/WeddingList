@@ -19,3 +19,6 @@ class UserList(TheWeddingShopBase, db.Model):
     state.matches = PRODUCT_STATES
     create_date = db.Column(db.DateTime(timezone=False), nullable=False)
     write_date = db.Column(db.DateTime(timezone=False), nullable=False)
+
+    product = db.relationship('Product', primaryjoin='UserList.product_id == Product.id', remote_side="Product.id")
+    user = db.relationship('User', primaryjoin='UserList.user_id == User.id', remote_side="User.id")
