@@ -22,17 +22,20 @@ def create_app():
         It will also initialise the start time which will be used for monitoring
         the execution time of the request.
         """
-        # TODO:
         g.start = time.time()
 
         if request.method == 'OPTIONS' or request.path in views.public_urls:
             return
 
+        # Get the version.
+        path = request.path.strip('/').split('/')
+        g.version = path[0]
+
     def after_request(response):
         """
         This method will be executed after each request.
         """
-        # TODO:
+        # TODO: Send log reports to a monitor service such as DataDog?
         return response
 
     with app.app_context():

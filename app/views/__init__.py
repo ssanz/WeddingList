@@ -5,6 +5,7 @@ from werkzeug.exceptions import BadRequest, Forbidden, MethodNotAllowed, NotFoun
 from app.docs.setup import swaggerui_api_blueprint
 from app.views.healthcheck import healthcheck
 from app.views.homepage import homepage
+from app.views.user import user_blueprint
 from app.views.user_list import user_list_blueprint
 
 # Set up public URLs.
@@ -16,10 +17,27 @@ public_urls = [
     f"{current_app.config['SWAGGER_API_URL']}/swagger-ui-standalone-preset.js"
 ]
 
+
+@user_blueprint.url_value_preprocessor
+@user_list_blueprint.url_value_preprocessor
+def path_preprocessor(endpoint, values):
+    """
+    Preprocessor function that will:
+    - Remove the dynamic values from the URL prefix. If the dynamic values are not removed, it will raise a
+     "TypeError" exception "got an unexpected keyword argument 'xxxxx'" (where 'xxxxx' is the key).
+     Some documentation can be found here: https://flask.palletsprojects.com/en/1.0.x/patterns/urlprocessors/
+    :param endpoint: (str) Endpoint.
+    :param values: (dict) Dynamic values from the path.
+    """
+    # Remove the 'version' code from the dynamic values.
+    values.pop('version')
+
+
 # Register blueprints.
 # # Documentation.
 current_app.register_blueprint(swaggerui_api_blueprint, url_prefix=current_app.config["SWAGGER_API_URL"])
 # # Endpoints.
+current_app.register_blueprint(user_blueprint)
 current_app.register_blueprint(user_list_blueprint)
 
 

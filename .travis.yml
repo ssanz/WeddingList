@@ -21,4 +21,11 @@ jobs:
         - psql -d test_the_wedding_shop -c "grant all privileges on all tables in schema public to wedding; alter default privileges in schema public grant all on tables to wedding;" -U postgres
         - sleep 2
       script:
+        # Install 'wkhtmltopdf'.
+        - wget https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.4/wkhtmltox-0.12.4_linux-generic-amd64.tar.xz
+        - tar xf  wkhtmltox-0.12.4_linux-generic-amd64.tar.xz
+        - cd ./wkhtmltox/bin/
+        - sudo cp -R ./* /usr/bin/
+        - wkhtmltopdf -V
+        # Run the tests.
         - tox
