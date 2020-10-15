@@ -70,3 +70,39 @@ Given more time, what improvements, if any, would you make to your code? Please 
 ## Submitting
 
 When you’re ready to submit, upload the repository to Github and share it with us!
+
+## Configuration
+There are few dependencies to be installed as before running the application:
+- Postgres
+- WkhtmlToPDF
+- Python libraries
+
+In order to do this, here are the commands that will be required to have everything install and ready to be used.
+
+```shell script
+$ apt update
+$ apt install postgresql-client
+$ wget https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.4/wkhtmltox-0.12.4_linux-generic-amd64.tar.xz
+$ tar xf  wkhtmltox-0.12.4_linux-generic-amd64.tar.xz
+$ cd ./wkhtmltox/bin/
+$ sudo cp -R ./* /usr/bin/
+$ wkhtmltopdf -V
+$ pip install -r requirements.txt
+```
+
+Before you run the application, there is one environment variable that will need to be set up, `PSQL_DATABASE_URI`.
+Example: `PSQL_DATABASE_URI=postgresql://localhost:5432/wedding_list`.
+
+For demo/local purpose, it is recommended to run the tests locally as it will import the products JSON file.
+
+## Postman
+In this project there is a folder called "Postman" which contains a JSON file. It could be used to import current
+API documentation for testing purposes.
+
+## Next steps.
+There are at least two important bits that were skipped due to lack of time:
+- User portal -> Create the templates to run the same actions that can be done from the API documentation in a user
+friendly website.
+- Authentication -> Every single endpoint except by healthcheck should go to the authentication preprocessor,
+checking both, valid token and access to the resource. In order to create the token, it was planned to use JWT getting
+the signature from AWS Secrets Manager with daily rotation (using boto3 library for implementation and moto for tests).
