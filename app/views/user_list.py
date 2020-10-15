@@ -4,6 +4,7 @@ from sqlalchemy.exc import DataError
 from werkzeug.exceptions import BadRequest, Forbidden, NotFound, NotImplemented
 
 from flask import current_app, request
+from sqlalchemy import and_
 
 from app.app import db
 from app.models.user import User
@@ -60,7 +61,9 @@ def _add_gift_to_list(user_id, product_id):
         raise Forbidden(ERROR_NOT_ENOUGH_STOCK)
 
     # # Check that the product does not exists for the user.
-    ul = UserList.query.filter_by(user_id=user_id, product_id=product_id).scalar()
+    ul = UserList.query.filter(and_(UserList.user_id == user_id,
+                                    UserList.product_id == product_id,
+                                    UserList.state.in_(["wish", "purchased"]))).scalar()
     if ul:
         raise Forbidden(ERROR_USER_LIST_PRODUCT_ALREADY_EXISTS)
 
