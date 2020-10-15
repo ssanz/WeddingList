@@ -5,6 +5,7 @@ from werkzeug.exceptions import BadRequest, Forbidden, MethodNotAllowed, NotFoun
 from app.docs.setup import swaggerui_api_blueprint
 from app.views.healthcheck import healthcheck
 from app.views.homepage import homepage
+from app.views.product import product_blueprint
 from app.views.user import user_blueprint
 from app.views.user_list import user_list_blueprint
 
@@ -18,6 +19,7 @@ public_urls = [
 ]
 
 
+@product_blueprint.url_value_preprocessor
 @user_blueprint.url_value_preprocessor
 @user_list_blueprint.url_value_preprocessor
 def path_preprocessor(endpoint, values):
@@ -37,6 +39,7 @@ def path_preprocessor(endpoint, values):
 # # Documentation.
 current_app.register_blueprint(swaggerui_api_blueprint, url_prefix=current_app.config["SWAGGER_API_URL"])
 # # Endpoints.
+current_app.register_blueprint(product_blueprint)
 current_app.register_blueprint(user_blueprint)
 current_app.register_blueprint(user_list_blueprint)
 
