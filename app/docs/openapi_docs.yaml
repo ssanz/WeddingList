@@ -167,6 +167,14 @@ components:
         in_stock_quantity:
           type: integer
           example: 50
+        create_date:
+          type: string
+          format: date-time
+          example: '2020-01-01T00:00:00'
+        write_date:
+          type: string
+          format: date-time
+          example: '2020-01-01T00:00:00'
     User:
       description: User information.
       type: object
@@ -212,6 +220,8 @@ components:
 tags:
   - name: healthcheck
     description: Service status information.
+  - name: product
+    description: Products information.
   - name: user
     description: Users information.
   - name: user_list
@@ -231,6 +241,45 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Healthcheck'
+  /product:
+    get:
+      tags:
+        - product
+      summary: Retrieve the users.
+      description: Call this endpoint to retrieve the users information.
+      operationId: user
+      parameters:
+        - $ref: '#/components/parameters/q'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/responses/SuccessRead/content/application%2Fjson/schema/properties/count'
+                  num_results:
+                    $ref: '#/components/responses/SuccessRead/content/application%2Fjson/schema/properties/num_results'
+                  page:
+                    $ref: '#/components/responses/SuccessRead/content/application%2Fjson/schema/properties/page'
+                  total_pages:
+                    $ref: '#/components/responses/SuccessRead/content/application%2Fjson/schema/properties/total_pages'
+                  objects:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '501':
+          $ref: '#/components/responses/NotImplemented'
   /user:
     get:
       tags:
