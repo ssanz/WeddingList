@@ -1,0 +1,241 @@
+{
+	"info": {
+		"_postman_id": "942a3143-1fb9-49ec-a1f8-c218557bd73e",
+		"name": "The Wedding Shop",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Product",
+			"item": [
+				{
+					"name": "Product",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{domain}}/{{version}}/product",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"{{version}}",
+								"product"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "Report",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{domain}}/{{version}}/user/b0f2d656-e994-43b4-8fc6-47ded5ff2680/report",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"{{version}}",
+								"user",
+								"b0f2d656-e994-43b4-8fc6-47ded5ff2680",
+								"report"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "User",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{domain}}/{{version}}/user",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"{{version}}",
+								"user"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "User list",
+			"item": [
+				{
+					"name": "User list",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{domain}}/{{version}}/user_list",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"{{version}}",
+								"user_list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create user list",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"user_id\": \"2f3fc631-b81a-4b10-88ce-a1e31ea05b1b\",\n\t\"product_id\": 5\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{domain}}/{{version}}/user_list",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"{{version}}",
+								"user_list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete user list",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{domain}}/{{version}}/user_list/2",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"{{version}}",
+								"user_list",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Purchase",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{domain}}/{{version}}/user_list/3/purchase",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"{{version}}",
+								"user_list",
+								"3",
+								"purchase"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Healthcheck",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"url": {
+					"raw": "{{domain}}/healthcheck",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"healthcheck"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}
